@@ -10,6 +10,8 @@ provider:
 functions:
   office-alexa-reinvent-2017:
     handler: handler.handler
+    events:
+      - alexaSkill
 
 resources:
   Resources:
