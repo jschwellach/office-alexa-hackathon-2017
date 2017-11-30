@@ -129,7 +129,7 @@ def check_in_session(intent, session):
 def checkout_session(intent, session):
     user = users[session['user']['userId']][0]
 
-    speech_output = "Welcome {}, I checked you out.".format(user)
+    speech_output = "I checked you out, {}.".format(user)
     reprompt_text = ""
 
     card_title = intent['name']
@@ -140,7 +140,9 @@ def checkout_session(intent, session):
     item = {
         'name' : user.lower(),
         'checkedIn' : 'false',
-        'timezone' : users[session['user']['userId']][1]
+        'timezone' : users[session['user']['userId']][1],
+        'start_time' : '9:00',
+        'end_time' : '18:00'
 
     }
     table.put_item(Item=item)
