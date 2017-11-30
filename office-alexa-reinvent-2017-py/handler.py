@@ -100,7 +100,7 @@ def check_in_session(intent, session):
 
     table = boto3.resource('dynamodb').Table(TABLE_NAME)
     item = {
-        'name' : user,
+        'name' : user.lower(),
         'checkedIn' : 'true',
         'timezone' : users[session['user']['userId']][1]
     }
@@ -123,6 +123,81 @@ def check_in_session(intent, session):
 #                        "my favorite color is red."
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
+
+def checkout_session(intent, session):
+    user = users[session['user']['userId']][0]
+
+    speech_output = "Welcome {}, I checked you out.".format(user)
+    reprompt_text = ""
+
+    card_title = intent['name']
+    session_attributes = {}
+    should_end_session = True
+
+    table = boto3.resource('dynamodb').Table(TABLE_NAME)
+    item = {
+        'name' : user,
+        'checkedIn' : 'false',
+        'timezone' : users[session['user']['userId']][1]
+    }
+    table.put_item(Item=item)
+    return build_response(session_attributes, build_speechlet_response(
+        card_title, speech_output, reprompt_text, should_end_session))
+
+def meeting_request_session(intent, session):
+    card_title = intent['name']
+    session_attributes = {}
+    should_end_session = True
+    user = users[session['user']['userId'].lower()][0]
+    table = boto3.resource('dynamodb').Table(TABLE_NAME)
+    dynamodb_response = table.get_item(
+                    Key={
+                        'name': str(user.lower())
+                    }
+                )
+    if ('Item' in dynamodb_response):
+        if dynamodb_response['Item']['checkedIn'] != 'true':
+            shouldEndSession = False
+            speech_output = "You are not checked in. Please check in with saying check in first"
+            reprompt_text = "You are not checked in. Please check in with saying check in first"
+            return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))
+        else:
+            if 'person' in intent['slots']:
+                item = table.get_item(
+                    Key={
+                        'name': str(intent['slots']['person']['value'].lower())
+                    }
+                )
+                if ('Item' not in item):
+                    logger.error("couldn't find item")
+                logger.info("Person %s" % item)
+                person = item['Item']
+                if person['checkedIn'] == 'false':
+                    speech_output = "I'm sorry {}, {} is currently not available for a chat.".format(user,person['name'])
+                    reprompt_text = ""
+                    shouldEndSession = True
+                else:
+                    speech_output = "Congratulations {}, your meeting with {} is successfully scheduled.".format(user,person['name'])
+                    reprompt_text = ""
+                    shouldEndSession = True
+            else:
+                speech_output = "I'm not sure with whom I should schedule the meeting. " \
+                                "You can tell me the name of the person by saying, "\
+                                "is person available for a meeting"
+                reprompt_text = "I'm not sure with whom I should schedule the meeting. " \
+                                "You can tell me the name of the person by saying, "\
+                                "is person available for a meeting"
+                should_end_session = False
+
+            return build_response(session_attributes, build_speechlet_response(
+                card_title, speech_output, reprompt_text, should_end_session))
+    else:
+        speech_output = "I'm sorry, I can't find the user in the database."
+        reprompt_text = ""
+        shouldEndSession = True
+        return build_response(session_attributes, build_speechlet_response(
+            card_title, speech_output, reprompt_text, should_end_session))
 
 
 def get_color_from_session(intent, session):
@@ -177,10 +252,12 @@ def on_intent(intent_request, session):
 
     print("intent_name %s" % intent_name)
     # Dispatch to your skill's intent handlers
-    if intent_name == "CheckIn":
+    if intent_name == "checkIn":
         return check_in_session(intent, session)
-    elif intent_name == "WhatsMyColorIntent":
-        return get_color_from_session(intent, session)
+    elif intent_name == "checkOut":
+        return checkout_session(intent, session)
+    elif intent_name == "meetingRequest":
+        return meeting_request_session(intent, session)
     elif intent_name == "AMAZON.HelpIntent":
         return get_welcome_response()
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":

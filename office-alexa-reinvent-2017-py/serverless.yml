@@ -7,6 +7,30 @@ provider:
   environment:
     DYNAMODB_TABLE: office-alexa-reinvent-users-py
 
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:BatchWriteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+    - Effect: "Allow"
+      Action:
+        - lambda:GetFunctionConfiguration
+        - lambda:GetFunction
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - apigateway:*
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - execute-api:Invoke
+      Resource: "arn:aws:execute-api:*:*:*"
 functions:
   office-alexa-reinvent-2017:
     handler: handler.handler
