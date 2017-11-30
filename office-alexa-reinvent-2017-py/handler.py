@@ -102,7 +102,9 @@ def check_in_session(intent, session):
     item = {
         'name' : user.lower(),
         'checkedIn' : 'true',
-        'timezone' : users[session['user']['userId']][1]
+        'timezone' : users[session['user']['userId']][1],
+        'start_time' : '9:00',
+        'end_time' : '18:00'
     }
     table.put_item(Item=item)
 
@@ -136,11 +138,10 @@ def checkout_session(intent, session):
 
     table = boto3.resource('dynamodb').Table(TABLE_NAME)
     item = {
-        'name' : user,
+        'name' : user.lower(),
         'checkedIn' : 'false',
-        'timezone' : users[session['user']['userId']][1],
-        'start_time' : '9:00',
-        'end_time' : '18:00'
+        'timezone' : users[session['user']['userId']][1]
+
     }
     table.put_item(Item=item)
     return build_response(session_attributes, build_speechlet_response(
@@ -166,6 +167,7 @@ def meeting_request_session(intent, session):
                 card_title, speech_output, reprompt_text, should_end_session))
         else:
             if 'person' in intent['slots']:
+                logger.info("searching for %s" % intent['slots']['person']['value'].lower())
                 item = table.get_item(
                     Key={
                         'name': str(intent['slots']['person']['value'].lower())
@@ -173,6 +175,20 @@ def meeting_request_session(intent, session):
                 )
                 if ('Item' not in item):
                     logger.error("couldn't find item")
+                    item = {
+                        'name': 'John',
+                        'timezone' : 'GMT',
+                        'start_time' : '9:00',
+                        'end_time' : '18:00',
+                        'checkedId' : 'true'
+                    }
+                    speech_output = "I can't find someone with the name {}. " \
+                                    "Please try again. ".format(intent['slots']['person']['value'])
+                    reprompt_text = "I can't find someone with the name {}. " \
+                                    "Please try again. ".format(intent['slots']['person']['value'])
+                    should_end_session = False
+                    return build_response(session_attributes, build_speechlet_response(
+                        card_title, speech_output, reprompt_text, should_end_session))
                 logger.info("Person %s" % item)
                 person = item['Item']
                 if person['checkedIn'] == 'false':
@@ -180,9 +196,9 @@ def meeting_request_session(intent, session):
                     reprompt_text = ""
                     shouldEndSession = False
                 else:
-                    speech_output = "Congratulations {}, your meeting with {} is successfully scheduled.".format(user,person['name'])
+                    speech_output = "Congratulations {}, {} is available now, let me get him on the phone for you?".format(user,person['name'])
                     reprompt_text = ""
-                    shouldEndSession = True
+                    shouldEndSession = False
             else:
                 speech_output = "I'm not sure with whom I should schedule the meeting. " \
                                 "You can tell me the name of the person by saying, "\
