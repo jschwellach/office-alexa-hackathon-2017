@@ -119,9 +119,10 @@ const handlers = {
         const speechOutput = this.t('CHECK_IN');
       console.log('event: ', this.event);
       console.log('user: ', this.event.session.user);
-      userId = this.event.session.user.userId;
-        user = users[userId];
-        this.emit(':tellWithCard', speechOutput + user);
+      var user = this.event.session.user;
+      var userId = user.userId;
+        var userString = users[userId];
+        this.emit(':tellWithCard', speechOutput + userString);
     },
     'GetFact': function () {
         // Get a random space fact from the space facts list
