@@ -16,7 +16,8 @@ TABLE_NAME = os.environ['DYNAMODB_TABLE']
 users = {
     "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7NAXQQ6LVZ6SCW5FPSHVZ3IK2G5Y4CU2TW4GGAII7KC2EWB25HOOVBZUZ4SAPKGB6IQFTN3KEGLQCXEQ7DJMMVTDUPFC73JVIUNBHTZYSLTJ6DXNKRMBOCAD76I2GTUUWEV7OO46AGNOC5XBMUBRGSCOWZE6NZZYB5G5CH62DNCQJUHNA7MZA" : ["Ricardo","PST"],
     "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ" : ["Yanos","SGT"],
-    "amzn1.ask.account.AF3VSAIDNLMEUAEPQS4Y47LLP3PL5XPWMOM22PJBUPSHMQGOLDOWL5K6KQWTHW4CSWNXU7AO2VJ7622YWWV6OGK7ISDTQP6LQJ32FF4OK5GVCMUPS34PATST4H444UGCBNATYLAFPBWK2CCAXZF3NHXFAZ4XLWQOARFWYY5D3KIYO4FYWTZUZMAJ53O3KQBUCJIL55TSC7IBN4I" : ["John","GMT"]
+    "amzn1.ask.account.AF3VSAIDNLMEUAEPQS4Y47LLP3PL5XPWMOM22PJBUPSHMQGOLDOWL5K6KQWTHW4CSWNXU7AO2VJ7622YWWV6OGK7ISDTQP6LQJ32FF4OK5GVCMUPS34PATST4H444UGCBNATYLAFPBWK2CCAXZF3NHXFAZ4XLWQOARFWYY5D3KIYO4FYWTZUZMAJ53O3KQBUCJIL55TSC7IBN4I" : ["John","GMT"],
+    "amzn1.ask.account.AFW2GRAVB2OG7XBB5AK2G6WTJQWECVWVB5XEFCRTY74RYB3LZBLXPSHQ3MDFMYG6Y4WWTVF4H2H7PBTUMYQXVKAXQWEQ7AA6IVJURWFR7EUD6RJTCJ4XHON5CBDPAXOQHVL4XGKL5RK2QGN6EITCM64ORFULJXKFIMR7V2GU32BWPINCLGVKBSEYAMDUPD7RSCBHGVHSSIDVOGA" : ["Tom","PST"]
 }
 
 
@@ -107,29 +108,13 @@ def check_in_session(intent, session):
         'end_time' : '18:00'
     }
     table.put_item(Item=item)
-
-#    if 'Color' in intent['slots']:
-#        favorite_color = intent['slots']['Color']['value']
-#        session_attributes = create_favorite_color_attributes(favorite_color)
-#        speech_output = "I now know your favorite color is " + \
-#                        favorite_color + \
-#                        ". You can ask me your favorite color by saying, " \
-#                        "what's my favorite color?"
-#        reprompt_text = "You can ask me your favorite color by saying, " \
-#                        "what's my favorite color?"
-#    else:
-#        speech_output = "I'm not sure what your favorite color is. " \
-#                        "Please try again."
-#        reprompt_text = "I'm not sure what your favorite color is. " \
-#                        "You can tell me your favorite color by saying, " \
-#                        "my favorite color is red."
     return build_response(session_attributes, build_speechlet_response(
         card_title, speech_output, reprompt_text, should_end_session))
 
 def checkout_session(intent, session):
     user = users[session['user']['userId']][0]
 
-    speech_output = "I checked you out, {}.".format(user)
+    speech_output = "I checked you out"
     reprompt_text = ""
 
     card_title = intent['name']
