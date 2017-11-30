@@ -10,6 +10,11 @@
 
 'use strict';
 
+const users = {
+  'amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7NAXQQ6LVZ6SCW5FPSHVZ3IK2G5Y4CU2TW4GGAII7KC2EWB25HOOVBZUZ4SAPKGB6IQFTN3KEGLQCXEQ7DJMMVTDUPFC73JVIUNBHTZYSLTJ6DXNKRMBOCAD76I2GTUUWEV7OO46AGNOC5XBMUBRGSCOWZE6NZZYB5G5CH62DNCQJUHNA7MZA': 'ricardo',
+  'amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ': 'janus'
+};
+
 const Alexa = require('alexa-sdk');
 
 const APP_ID = "amzn1.ask.skill.42d881a4-20f3-4fe4-897b-3f063403a463";
@@ -112,7 +117,8 @@ const handlers = {
     },
     'CheckIn': function () {
         const speechOutput = this.t('CHECK_IN');
-        this.emit(':tellWithCard', speechOutput);
+      user = users[event.session.user.usedId];
+        this.emit(':tellWithCard', speechOutput + user);
     },
     'GetFact': function () {
         // Get a random space fact from the space facts list
