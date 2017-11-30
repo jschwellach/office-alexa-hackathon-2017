@@ -44,7 +44,8 @@ const languageStrings = {
       HELP_REPROMPT: 'What can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
       CHECK_IN: "I've Checked you in. Have a great day.",
-      MEETING_REQUEST: " is asleep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?"
+      MEETING_REQUEST: " is asleep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?",
+      MEETING_REQUEST_NOW: " is available now, let me get him on the phone for you."
     },
   },
   'en-US': {
@@ -141,6 +142,20 @@ const handlers = {
     var userString = users[userId];
     // Save checkin state to dynamo
     const speechOutput = this.t('MEETING_REQUEST');
+    this.emit(':tellWithCard', 'Hi ' + userString + ', ' + target + speechOutput);
+  },
+  'MeetingRequestNow': function () {
+    // Assuming Tom is the caller
+    // John is the target
+    var caller = 'Tom';
+    var target = 'John';
+    console.log('event: ', this.event);
+    console.log('user: ', this.event.session.user);
+    var user = this.event.session.user;
+    var userId = user.userId;
+    var userString = users[userId];
+    // Save checkin state to dynamo
+    const speechOutput = this.t('MEETING_REQUEST_NOW');
     this.emit(':tellWithCard', 'Hi ' + userString + ', ' + target + speechOutput);
   },
   'GetFact': function () {
