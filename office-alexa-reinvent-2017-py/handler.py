@@ -1,7 +1,22 @@
+import json
+import os
+import logging
+import zipfile
+import boto3
+import time
+import uuid
+from boto3.dynamodb.conditions import Key, Attr
+from boto3 import dynamodb
+logging.basicConfig()
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+TABLE_NAME = os.environ['DYNAMODB_TABLE']
 
 users = {
-    "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7NAXQQ6LVZ6SCW5FPSHVZ3IK2G5Y4CU2TW4GGAII7KC2EWB25HOOVBZUZ4SAPKGB6IQFTN3KEGLQCXEQ7DJMMVTDUPFC73JVIUNBHTZYSLTJ6DXNKRMBOCAD76I2GTUUWEV7OO46AGNOC5XBMUBRGSCOWZE6NZZYB5G5CH62DNCQJUHNA7MZA" : "Ricardo",
-    "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ" : "Yanos"
+    "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7NAXQQ6LVZ6SCW5FPSHVZ3IK2G5Y4CU2TW4GGAII7KC2EWB25HOOVBZUZ4SAPKGB6IQFTN3KEGLQCXEQ7DJMMVTDUPFC73JVIUNBHTZYSLTJ6DXNKRMBOCAD76I2GTUUWEV7OO46AGNOC5XBMUBRGSCOWZE6NZZYB5G5CH62DNCQJUHNA7MZA" : ["Ricardo","PST"],
+    "amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ" : ["Yanos","SGT"],
+    "amzn1.ask.account.AF3VSAIDNLMEUAEPQS4Y47LLP3PL5XPWMOM22PJBUPSHMQGOLDOWL5K6KQWTHW4CSWNXU7AO2VJ7622YWWV6OGK7ISDTQP6LQJ32FF4OK5GVCMUPS34PATST4H444UGCBNATYLAFPBWK2CCAXZF3NHXFAZ4XLWQOARFWYY5D3KIYO4FYWTZUZMAJ53O3KQBUCJIL55TSC7IBN4I" : ["John","GMT"]
 }
 
 
@@ -74,16 +89,22 @@ def create_favorite_color_attributes(favorite_color):
 def check_in_session(intent, session):
     """
     """
+    user = users[session['user']['userId']][0]
 
-    print("userID %s" % session['user']['userId'])
-    user = users[session['user']['userId']]
-
-    speech_output = "Welcome %s, I checked you in."
-    reprompt_text = "I don't understand your command."
+    speech_output = "Welcome {}, I checked you in.".format(user)
+    reprompt_text = ""
 
     card_title = intent['name']
     session_attributes = {}
-    should_end_session = False
+    should_end_session = True
+
+    table = boto3.resource('dynamodb').Table(TABLE_NAME)
+    item = {
+        'name' : user,
+        'checkedIn' : 'true',
+        'timezone' : users[session['user']['userId']][1]
+    }
+    table.put_item(Item=item)
 
 #    if 'Color' in intent['slots']:
 #        favorite_color = intent['slots']['Color']['value']
@@ -154,6 +175,7 @@ def on_intent(intent_request, session):
     intent = intent_request['intent']
     intent_name = intent_request['intent']['name']
 
+    print("intent_name %s" % intent_name)
     # Dispatch to your skill's intent handlers
     if intent_name == "CheckIn":
         return check_in_session(intent, session)
@@ -164,7 +186,7 @@ def on_intent(intent_request, session):
     elif intent_name == "AMAZON.CancelIntent" or intent_name == "AMAZON.StopIntent":
         return handle_session_end_request()
     else:
-        raise ValueError("Invalid intent")
+        return get_welcome_response()
 
 
 def on_session_ended(session_ended_request, session):
@@ -186,9 +208,10 @@ def handler(event, context):
     print("event.session.application.applicationId=" +
           event['session']['application']['applicationId'])
 
-    if (event['session']['application']['applicationId'] !=
-        "amzn1.ask.skill.42d881a4-20f3-4fe4-897b-3f063403a463"):
-        raise ValueError("Invalid Application ID")
+#    if (event['session']['application']['applicationId'] !=
+#        "amzn1.ask.skill.42d881a4-20f3-4fe4-897b-3f063403a463"):
+#
+#        raise ValueError("Invalid Application ID")
 
     if event['session']['new']:
         on_session_started({'requestId': event['request']['requestId']},
