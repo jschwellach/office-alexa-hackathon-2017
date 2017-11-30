@@ -1,0 +1,28 @@
+service: office-alexa-reinvent-2017
+
+provider:
+  name: aws
+  runtime: nodejs6.10
+  region: us-east-1
+  environment:
+    DYNAMODB_TABLE: office-alexa-reinvent-users
+
+functions:
+  office-alexa-reinvent-2017:
+    handler: handler.handler
+
+resources:
+  Resources:
+    DynamodDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
