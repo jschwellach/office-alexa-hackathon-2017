@@ -42,7 +42,7 @@ const languageStrings = {
       HELP_MESSAGE: 'You can say tell me a space fact, or, you can say exit... What can I help you with?',
       HELP_REPROMPT: 'What can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
-      CHECK_IN: " I've Checked you in. Have a great day.",
+      CHECK_IN: "I've Checked you in. Have a great day.",
       MEETING_REQUEST: " is asleep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?"
     },
   },
@@ -126,7 +126,7 @@ const handlers = {
     var userId = user.userId;
     var userString = users[userId];
     // Save checkin state to dynamo
-    this.emit(':tellWithCard', 'Hi ' + userString + speechOutput );
+    this.emit(':tellWithCard', 'Hi ' + userString + ', ' + speechOutput );
   },
   'MeetingRequest': function () {
     // Assuming Tom is the caller
