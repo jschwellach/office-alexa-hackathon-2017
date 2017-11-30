@@ -128,7 +128,7 @@ const handlers = {
     // Save checkin state to dynamo
     this.emit(':tellWithCard', 'Hi ' + userString + speechOutput );
   },
-  'meetingRequest': function () {
+  'MeetingRequest': function () {
     // Assuming Tom is the caller
     // John is the target
     var caller = 'Tom';
