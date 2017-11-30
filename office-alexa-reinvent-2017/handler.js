@@ -12,7 +12,7 @@
 
 const Alexa = require('alexa-sdk');
 
-const APP_ID = undefined;  // TODO replace with your app ID (OPTIONAL).
+const APP_ID = "amzn1.ask.skill.42d881a4-20f3-4fe4-897b-3f063403a463";
 
 const languageStrings = {
     'en': {
@@ -37,6 +37,7 @@ const languageStrings = {
             HELP_MESSAGE: 'You can say tell me a space fact, or, you can say exit... What can I help you with?',
             HELP_REPROMPT: 'What can I help you with?',
             STOP_MESSAGE: 'Goodbye!',
+            CHECK_IN: 'Checked in!',
         },
     },
     'en-US': {
@@ -109,8 +110,9 @@ const handlers = {
     'LaunchRequest': function () {
         this.emit('GetFact');
     },
-    'GetNewFactIntent': function () {
-        this.emit('GetFact');
+    'CheckIn': function () {
+        const speechOutput = this.t('CHECK_IN');
+        this.emit(':tellWithCard', speechOutput);
     },
     'GetFact': function () {
         // Get a random space fact from the space facts list
