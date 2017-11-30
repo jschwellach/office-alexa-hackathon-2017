@@ -12,7 +12,7 @@
 
 const users = {
   'amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7NAXQQ6LVZ6SCW5FPSHVZ3IK2G5Y4CU2TW4GGAII7KC2EWB25HOOVBZUZ4SAPKGB6IQFTN3KEGLQCXEQ7DJMMVTDUPFC73JVIUNBHTZYSLTJ6DXNKRMBOCAD76I2GTUUWEV7OO46AGNOC5XBMUBRGSCOWZE6NZZYB5G5CH62DNCQJUHNA7MZA': 'John',
-  'amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ': 'Yanos'
+  'amzn1.ask.account.AFYHQ32LVQ54MEE6B667C4S6FW7GCX6TB4F6YKF6Y76SAVLVKARIIKWLKZ4NGTZGEWAE2AGMLDCOM4ZZDCNZ42RWLREYV5LYXUS2D5QRHWC3GAFI44CG3HZYSVTQN5D2RKWRAU4SRXW7ABCSAEFRLTT6LPQP4LQPYER2LFWOEDSBJC5J7AUVJ24BJMZ75VSXSJFCUN557MRJXRQ': 'Tom'
 };
 
 const Alexa = require('alexa-sdk');
@@ -42,7 +42,8 @@ const languageStrings = {
       HELP_MESSAGE: 'You can say tell me a space fact, or, you can say exit... What can I help you with?',
       HELP_REPROMPT: 'What can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
-      CHECK_IN: 'Checked in!',
+      CHECK_IN: " I've Checked you in. Have a great day.",
+      MEETING_REQUEST: " is alseep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?"
     },
   },
   'en-US': {
@@ -112,14 +113,6 @@ const languageStrings = {
 };
 
 
-// Load the AWS SDK for Node.js
-var AWS = require('aws-sdk');
-// Set the region
-AWS.config.update({region: 'REGION'});
-
-// Create the DynamoDB service object
-var ddb = new AWS.DynamoDB({apiVersion: '2012-10-08'});
-
 
 const handlers = {
   'LaunchRequest': function () {
@@ -133,52 +126,21 @@ const handlers = {
     var userId = user.userId;
     var userString = users[userId];
     // Save checkin state to dynamo
-    var params = {
-      TableName: process.env.DYNAMODB_TABLE,
-      Item: {
-        'name' : userString,
-        'checked_in' : true
-      }
-    };
-
-    // Call DynamoDB to add the item to the table
-    ddb.putItem(params, function(err, data) {
-      if (err) {
-        console.log("Error", err);
-      } else {
-        console.log("Success", data);
-      }
-    });
-    this.emit(':tellWithCard', speechOutput + userString);
+    this.emit(':tellWithCard', 'Hi ' + userString + speechOutput );
   },
   'meetingRequest': function () {
     // Assuming Tom is the caller
     // John is the target
     var caller = 'Tom';
     var target = 'John';
-    var params = {
-      Key: {
-        "name": {
-          S: target
-        }
-      },
-      TableName: process.env.DYNAMODB_TABLE,
-    };
-    dynamodb.getItem(params, function(err, data) {
-      if (err) {console.log(err, err.stack)} // an error occurred
-      else {
-        console.log(data);           // successful response
-        //
-      }
-    });
-
     console.log('event: ', this.event);
     console.log('user: ', this.event.session.user);
     var user = this.event.session.user;
     var userId = user.userId;
     var userString = users[userId];
     // Save checkin state to dynamo
-    this.emit(':tellWithCard', speechOutput + userString);
+    const speechOutput = this.t('MEETING_REQUEST');
+    this.emit(':tellWithCard', 'Hi ' + userString + ', ' + target + speechOutput);
   },
   'GetFact': function () {
     // Get a random space fact from the space facts list
