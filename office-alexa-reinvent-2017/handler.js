@@ -43,7 +43,7 @@ const languageStrings = {
       HELP_REPROMPT: 'What can I help you with?',
       STOP_MESSAGE: 'Goodbye!',
       CHECK_IN: " I've Checked you in. Have a great day.",
-      MEETING_REQUEST: " is alseep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?"
+      MEETING_REQUEST: " is asleep at the moment, would you like to try again in 5 hours when it's 9am in John's timezone?"
     },
   },
   'en-US': {
