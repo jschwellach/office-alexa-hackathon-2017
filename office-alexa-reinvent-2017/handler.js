@@ -117,7 +117,8 @@ const handlers = {
     },
     'CheckIn': function () {
         const speechOutput = this.t('CHECK_IN');
-      user = users[this.event.session.user.usedId];
+      console.log('event: ', this.event)
+      user = users[this.event.session.user.userId];
         this.emit(':tellWithCard', speechOutput + user);
     },
     'GetFact': function () {
