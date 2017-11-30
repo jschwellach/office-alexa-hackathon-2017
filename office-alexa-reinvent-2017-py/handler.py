@@ -138,7 +138,9 @@ def checkout_session(intent, session):
     item = {
         'name' : user,
         'checkedIn' : 'false',
-        'timezone' : users[session['user']['userId']][1]
+        'timezone' : users[session['user']['userId']][1],
+        'start_time' : '9:00',
+        'end_time' : '18:00'
     }
     table.put_item(Item=item)
     return build_response(session_attributes, build_speechlet_response(
@@ -148,7 +150,7 @@ def meeting_request_session(intent, session):
     card_title = intent['name']
     session_attributes = {}
     should_end_session = True
-    user = users[session['user']['userId'].lower()][0]
+    user = users[session['user']['userId']][0]
     table = boto3.resource('dynamodb').Table(TABLE_NAME)
     dynamodb_response = table.get_item(
                     Key={
@@ -174,9 +176,9 @@ def meeting_request_session(intent, session):
                 logger.info("Person %s" % item)
                 person = item['Item']
                 if person['checkedIn'] == 'false':
-                    speech_output = "I'm sorry {}, {} is currently not available for a chat.".format(user,person['name'])
+                    speech_output = "I'm sorry {}, {} is asleep at the moment, would you like to try again in 5 hours when it's {} in {}'s timezone?".format(user,person['name'],person['start_time'],person['name'])
                     reprompt_text = ""
-                    shouldEndSession = True
+                    shouldEndSession = False
                 else:
                     speech_output = "Congratulations {}, your meeting with {} is successfully scheduled.".format(user,person['name'])
                     reprompt_text = ""
